@@ -1,6 +1,7 @@
-int lastState;
-long touchOffStart, touchOffDelay;
+#ifndef _KNOCK_CPP_
+#define _KNOCK_CPP_
 
+#include <Arduino.h>
 // preset
 int delayDurations[6] = {
   200, 85, 60, 220, 450, 200
@@ -9,11 +10,13 @@ int delayDurations[6] = {
 int delayShifter[6] = {
   0, 0, 0, 0, 0, 0
 };
-int delayCount = 6;
 
-void setup()
-{
-  Serial.begin(115200);
+// global variables to use
+int delayCount = 6;
+long touchOffStart, touchOffDelay;
+bool lastState = 0;
+
+void knockSSInit() {
   lastState = 0;
 }
 
@@ -63,3 +66,5 @@ void runKnockDetection(bool* unlock) {
     lastState = curState;
   }
 }
+
+#endif
