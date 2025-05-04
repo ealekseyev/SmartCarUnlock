@@ -9,6 +9,8 @@ void setup() {
   initCarFunctions();
   RFIDInit();
   knockSSInit();
+  pinMode(16, OUTPUT);
+  digitalWrite(16, 1);
 }
 
 long lastUnlock = -1000;

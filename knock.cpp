@@ -18,6 +18,7 @@ bool lastState = 0;
 
 void knockSSInit() {
   lastState = 0;
+  analogReadResolution(12);
 }
 
 void shiftDelays(int* toshift, int insert) {
@@ -47,7 +48,8 @@ bool matchesKnock(int* _delayShifter) {
 }
 
 void runKnockDetection(bool* unlock) {
-  int curState = touchRead(4) < 50;
+  //int curState = touchRead(4) < 50;
+  int curState = analogRead(27) < 3500;
   // if it just became 1
   if(curState == 0 && lastState == 1) {
     touchOffStart = millis();
@@ -58,6 +60,7 @@ void runKnockDetection(bool* unlock) {
     //   Serial.print("\nKnock Combination: ");
     // }
     shiftDelays(delayShifter, touchOffDelay);
+    Serial.print(" knock ");
 
     if(matchesKnock(delayShifter)) {
       *unlock = true;
