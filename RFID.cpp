@@ -31,6 +31,7 @@ void checkRFID(bool* unlock) {
   for(int i = 0; i < 4; i++) {
     if(PSWBuff[i] != mfrc522.uid.uidByte[i]) {
       auth = false;
+      delay(1000); // prevent brute force attack
       break;
     }
   }

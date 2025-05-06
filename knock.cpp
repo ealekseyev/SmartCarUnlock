@@ -15,9 +15,14 @@ int delayShifter[6] = {
 int delayCount = 6;
 long touchOffStart, touchOffDelay;
 bool lastState = 0;
+long lastKnock;
 
 void knockSSInit() {
+  pinMode(13, OUTPUT);
+  delay(100);
+  digitalWrite(13, 1);
   lastState = 0;
+  lastKnock = millis();
   analogReadResolution(12);
 }
 
@@ -47,26 +52,32 @@ bool matchesKnock(int* _delayShifter) {
   return totalDiff < 0.6;
 }
 
-void runKnockDetection(bool* unlock) {
-  //int curState = touchRead(4) < 50;
-  int curState = analogRead(27) < 3500;
-  // if it just became 1
-  if(curState == 0 && lastState == 1) {
-    touchOffStart = millis();
-    lastState = curState;
-  } else if(curState == 1 && lastState == 0) {
-    touchOffDelay = millis() - touchOffStart;
-    // if(touchOffDelay > 700) {
-    //   Serial.print("\nKnock Combination: ");
-    // }
-    shiftDelays(delayShifter, touchOffDelay);
-    Serial.print(" knock ");
+unsigned long lastDebounceTime = 0;  // Last time the input was toggled
+const unsigned long debounceDelay = 40;  // Minimum time between valid state changes (ms)
 
-    if(matchesKnock(delayShifter)) {
-      *unlock = true;
-      Serial.println(" Matches Knock!");
+void runKnockDetection(bool* unlock) {
+  int curState = analogRead(12) < 3500;
+  unsigned long currentTime = millis();
+
+  // Debounce logic: only allow state change if enough time has passed
+  if (curState != lastState && (currentTime - lastDebounceTime) > debounceDelay) {
+    lastDebounceTime = currentTime;
+
+    if (curState == 0 && lastState == 1) {
+      touchOffStart = currentTime;
+      lastState = curState;
+    } else if (curState == 1 && lastState == 0) {
+      touchOffDelay = currentTime - touchOffStart;
+
+      shiftDelays(delayShifter, touchOffDelay);
+      Serial.print(" knock ");
+
+      if (matchesKnock(delayShifter)) {
+        *unlock = true;
+        Serial.println(" Matches Knock!");
+      }
+      lastState = curState;
     }
-    lastState = curState;
   }
 }
 
